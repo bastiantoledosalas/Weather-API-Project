@@ -1,9 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import pino from 'pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = pino({
+    transport: {
+      target: 'pino-pretty', // 👈 logs bonitos en dev
+      options: {
+        colorize: true,
+      },
+    },
+  });
+
+    const app = await NestFactory.create(AppModule, {
+    logger,
+  });
   
   // Configurar Swagger
   const config = new DocumentBuilder()
