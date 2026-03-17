@@ -40,7 +40,7 @@ export class WeatherService {
       );
 
       const data = {
-        city        : response.data.currentConditions.temp,
+        city        : response.data.resolvedAddress || city,
         temperature : response.data.currentConditions.temp,
         description : response.data.currentConditions.conditions,
         humidity    : response.data.currentConditions.humidity,
