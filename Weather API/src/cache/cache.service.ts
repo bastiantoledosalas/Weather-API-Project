@@ -7,7 +7,7 @@ export class CacheService {
 
   constructor() {
     this.client = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
+      host: process.env.REDIS_HOST || 'redis',
       port: 6379,
     });
   }
