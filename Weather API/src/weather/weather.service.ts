@@ -2,15 +2,25 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
 export class WeatherService {
   constructor(
     private httpService: HttpService,
     private configService: ConfigService,
+    private cacheService: CacheService,
   ) {}
 
   async getWeather(city: string) {
+    const cacheKey = `weather:${city.toLowerCase()}`;
+
+    // Buscar en cache
+    const cached = await this.cacheService.get(cacheKey);
+    if (cached){
+        return JSON.parse(cached);
+    }
+
     try {
       const apiKey = this.configService.get<string>('WEATHER_API_KEY');
 
@@ -20,16 +30,21 @@ export class WeatherService {
         this.httpService.get(url),
       );
 
-      const data = response.data;
-
-      // Transformación de datos
-      return {
-        city: data.resolvedAddress,
-        temperature: data.currentConditions.temp,
-        description: data.currentConditions.conditions,
-        humidity: data.currentConditions.humidity,
-        datetime: data.currentConditions.datetime,
+      const data = {
+        city        : response.data.currentConditions.temp,
+        temperature : response.data.currentConditions.temp,
+        description : response.data.currentConditions.conditions,
+        humidity    : response.data.currentConditions.humidity,
+        datetime    : response.data.currentConditions.datetime,
       };
+
+      // Almacenar en cache
+      await this.cacheService.set(
+        cacheKey,
+        JSON.stringify(data),
+        43200,
+      )
+      return data;
 
     } catch (error) {
       throw new HttpException(
