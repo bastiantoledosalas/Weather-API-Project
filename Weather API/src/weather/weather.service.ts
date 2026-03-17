@@ -3,9 +3,12 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { CacheService } from 'src/cache/cache.service';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class WeatherService {
+  private readonly logger = new Logger(WeatherService.name);
+
   constructor(
     private httpService: HttpService,
     private configService: ConfigService,
@@ -15,14 +18,21 @@ export class WeatherService {
   async getWeather(city: string) {
     const cacheKey = `weather:${city.toLowerCase()}`;
 
+    this.logger.log(`Request weather for city: ${city}`);
+    
     // Buscar en cache
     const cached = await this.cacheService.get(cacheKey);
     if (cached){
+      this.logger.log(`Cache HIT for key: ${cacheKey}`);
         return JSON.parse(cached);
     }
 
+    this.logger.warn(`Cache MISS for key: ${cacheKey}`);
+
     try {
       const apiKey = this.configService.get<string>('WEATHER_API_KEY');
+
+      this.logger.log(`Calling external weather API for: ${city}`);
 
       const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city}?key=${apiKey}&unitGroup=metric`;
 
@@ -44,9 +54,18 @@ export class WeatherService {
         JSON.stringify(data),
         43200,
       )
+
+      this.logger.log(`Weather data cached for key: ${cacheKey}`);
+
       return data;
 
     } catch (error) {
+
+      this.logger.error(
+        `Error fetching weather for city: ${city}`,
+        error.stack,
+      );
+
       throw new HttpException(
         'Error fetching weather data',
         HttpStatus.BAD_GATEWAY,

@@ -6,11 +6,22 @@ import { CacheModule } from './cache/cache.module';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
     WeatherModule, 
     CacheModule,
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport:{
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+          }
+        }
+      }
+    }),
     ThrottlerModule.forRoot({
       throttlers: [
         {
