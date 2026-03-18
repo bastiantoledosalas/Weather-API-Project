@@ -56,4 +56,7 @@ npm install
 
 ## 🌐 URL del Proyecto
 
-[Ver repositorio en GitHub](https://weather-api-project-production.up.railway.app/)
+https://weather-api-project-production.up.railway.app/
+
+### Ejemplo de Endpoint
+👉 https://weather-api-project-production.up.railway.app/weather?city=Santiago
