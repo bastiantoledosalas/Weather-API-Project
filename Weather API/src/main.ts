@@ -8,13 +8,13 @@ async function bootstrap() {
   // Swagger
   const config = new DocumentBuilder()
     .setTitle('Weather API')
-    .setDescription('API para consultar el clima utilizado cache con Redis')
+    .setDescription('API de clima utilizado cache con Redis')
     .setVersion('1.0')
     .addTag('Weather')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('', app, document);
 
   await app.listen(3000);
 }
