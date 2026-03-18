@@ -7,10 +7,21 @@ export class CacheService {
   private readonly logger = new Logger(CacheService.name);
 
   constructor() {
-    this.client = new Redis({
-      host: process.env.REDIS_HOST || 'redis',
-      port: 6379,
+    if (process.env.REDIS_URL) {
+      
+      // 🚀 Producción (Railway)
+      this.client = new Redis(process.env.REDIS_URL);
+      this.logger.log('Using Redis from REDIS_URL');
+    } else {
+
+      // Local / Docker
+      this.client = new Redis({
+        host: process.env.REDIS_HOST || 'localhost',
+        port: 6379,
       });
+      this.logger.log('Using local Redis');
+    }
+
     this.client.on('connect', () => {
       this.logger.log('Redis connected');
     });
@@ -31,7 +42,7 @@ export class CacheService {
       this.logger.debug(`Cache MISS: ${key}`);
     }
 
-    return this.client.get(key);
+    return result; //
   }
 
   async set(key: string, value: string, ttl: number): Promise<void> {
